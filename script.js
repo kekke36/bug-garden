@@ -7,11 +7,15 @@ const messageEl = document.getElementById('message');
 const netEl = document.getElementById('net');
 
 const BUG_TYPES = [
-  { name: 'bee', color: '#f0d640', accent: '#f8a400', size: 34 },
-  { name: 'ladybug', color: '#f26b5d', accent: '#e2403a', size: 30 },
-  { name: 'butterfly', color: '#7d8cff', accent: '#4b5ed6', size: 36 },
-  { name: 'dragonfly', color: '#67d7d9', accent: '#2e9ca5', size: 32 },
-  { name: 'beetle', color: '#7d6ad7', accent: '#5847b8', size: 32 },
+  { name: 'bee', label: 'はち', points: 3, color: '#f0d640', accent: '#f8a400', size: 34 },
+  { name: 'ladybug', label: 'てんとうむし', points: 2, color: '#f26b5d', accent: '#e2403a', size: 30 },
+  { name: 'butterfly', label: 'ちょうちょ', points: 5, color: '#7d8cff', accent: '#4b5ed6', size: 36 },
+  { name: 'dragonfly', label: 'とんぼ', points: 4, color: '#67d7d9', accent: '#2e9ca5', size: 32 },
+  { name: 'beetle', label: 'かぶとむし', points: 6, color: '#7d6ad7', accent: '#5847b8', size: 32 },
+  { name: 'ant', label: 'あり', points: 1, color: '#805642', accent: '#49372e', size: 26 },
+  { name: 'grasshopper', label: 'ばった', points: 3, color: '#8bcf55', accent: '#4f9639', size: 34 },
+  { name: 'firefly', label: 'ほたる', points: 5, color: '#b7d957', accent: '#f5df62', size: 30 },
+  { name: 'caterpillar', label: 'いもむし', points: 2, color: '#65bd78', accent: '#35894c', size: 32 },
 ];
 
 const state = {
@@ -130,21 +134,25 @@ function updateBugs() {
 function catchNearbyBugs(x, y) {
   if (!state.running) return;
 
-  let caughtThisClick = 0;
+  const caughtBugs = [];
   const bugsToCatch = [...state.bugs];
 
   for (const bug of bugsToCatch) {
     const distance = Math.hypot(bug.x - x, bug.y - y);
     if (distance < bug.radius + 28) {
-      caughtThisClick += 1;
-      state.score += 1;
+      caughtBugs.push(bug);
+      state.score += bug.type.points;
       setScore();
       removeBug(bug);
     }
   }
 
-  if (caughtThisClick > 0) {
-    messageEl.textContent = `やったー！ ${caughtThisClick} びつかまえた！`;
+  if (caughtBugs.length > 0) {
+    const pointsEarned = caughtBugs.reduce((total, bug) => total + bug.type.points, 0);
+    const catchMessage = caughtBugs.length === 1
+      ? `${caughtBugs[0].type.label} +${pointsEarned}てん！`
+      : `${caughtBugs.length}ひきつかまえた！ +${pointsEarned}てん！`;
+    messageEl.textContent = `やったー！ ${catchMessage}`;
     messageEl.classList.remove('hidden');
     window.setTimeout(() => {
       if (state.running) {
